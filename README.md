@@ -568,5 +568,11 @@ guanlan/
 
 互联网行业市场人，TRAE 社区核心用户，ID 是色号，TRAE AI 创造力大赛 TOP 20，小游戏「谁输谁洗碗」累计 4.8w 用户。
 
+| 平台 | 账号 | 链接 |
+|---|---|---|
+| 小红书 | 4682B4 | <https://xhslink.cn/o/1tAs6oCn5ce> |
+| 抖音 | 4682B4 | 抖音号 `Roy_4682B4` |
+| TRAE 社区 | 4682B4 | <https://forum.trae.cn/u/4682b4/summary> |
+
 - GitHub：[@4682b4leee](https://github.com/4682b4leee)
 - 项目：[4682B4-guanlan](https://github.com/4682b4leee/4682B4-guanlan)
