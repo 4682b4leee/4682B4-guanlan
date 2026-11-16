@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="862" height="48" viewBox="0 0 862 48">
+<svg xmlns="http://www.w3.org/2000/svg" width="1014" height="48" viewBox="0 0 1014 48">
   <!-- README 顶部徽章条：纯本地 SVG，不依赖 shields.io，离线也能显示
        每个胶囊宽度 = 左侧 30px（含圆点）+ 文字实测宽度 + 右侧 20px
        文字基线 28.5：12.5px 字号在 40px 高胶囊内垂直居中 -->
@@ -27,23 +27,28 @@
   <circle cx="278" cy="24" r="4" fill="#00a1d6"/>
   <text class="txt" x="290" y="28.5">Playwright</text>
 
-  <!-- 4. 本地优先 -->
-  <rect class="pill" x="397" y="4" width="103" height="40" rx="20"/>
-  <circle cx="415" cy="24" r="4" fill="#1f9d55"/>
-  <text class="txt-cn" x="427" y="28.5">本地优先</text>
+  <!-- 4. 开发方式 -->
+  <rect class="pill" x="397" y="4" width="142" height="40" rx="20"/>
+  <circle cx="415" cy="24" r="4" fill="#2231dd"/>
+  <text class="txt-cn" x="427" y="28.5">使用 TRAE 开发</text>
 
-  <!-- 5. 只读边界 -->
-  <rect class="pill" x="510" y="4" width="103" height="40" rx="20"/>
-  <circle cx="528" cy="24" r="4" fill="#17181a"/>
-  <text class="txt-cn" x="540" y="28.5">只读采集</text>
+  <!-- 5. 本地优先 -->
+  <rect class="pill" x="549" y="4" width="103" height="40" rx="20"/>
+  <circle cx="567" cy="24" r="4" fill="#1f9d55"/>
+  <text class="txt-cn" x="579" y="28.5">本地优先</text>
 
-  <!-- 6. 测试 -->
-  <rect class="pill" x="623" y="4" width="150" height="40" rx="20"/>
-  <circle cx="641" cy="24" r="4" fill="#1f9d55"/>
-  <text class="txt" x="653" y="28.5">60 tests · OK</text>
+  <!-- 6. 只读边界 -->
+  <rect class="pill" x="662" y="4" width="103" height="40" rx="20"/>
+  <circle cx="680" cy="24" r="4" fill="#17181a"/>
+  <text class="txt-cn" x="692" y="28.5">只读采集</text>
 
-  <!-- 7. 许可证 -->
-  <rect class="pill" x="783" y="4" width="75" height="40" rx="20"/>
-  <circle cx="801" cy="24" r="4" fill="#2231dd"/>
-  <text class="txt" x="813" y="28.5">MIT</text>
+  <!-- 7. 测试 -->
+  <rect class="pill" x="775" y="4" width="150" height="40" rx="20"/>
+  <circle cx="793" cy="24" r="4" fill="#1f9d55"/>
+  <text class="txt" x="805" y="28.5">60 tests · OK</text>
+
+  <!-- 8. 许可证 -->
+  <rect class="pill" x="935" y="4" width="75" height="40" rx="20"/>
+  <circle cx="953" cy="24" r="4" fill="#2231dd"/>
+  <text class="txt" x="965" y="28.5">MIT</text>
 </svg>

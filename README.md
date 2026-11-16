@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/readme/badges.svg" alt="Python 3.9+ / 4 个平台 / Playwright / 本地优先 / 只读采集 / 60 tests / MIT" width="862" />
+  <img src="assets/readme/badges.svg" alt="Python 3.9+ / 4 个平台 / Playwright / 使用 TRAE 开发 / 本地优先 / 只读采集 / 60 tests / MIT" width="1014" />
 </p>
 
 <p align="center">
@@ -561,3 +561,12 @@ guanlan/
 ## 许可证
 
 [MIT](LICENSE)
+
+---
+
+## Connect · 4682B4
+
+互联网行业市场人，TRAE 社区核心用户，ID 是色号，TRAE AI 创造力大赛 TOP 20，小游戏「谁输谁洗碗」累计 4.8w 用户。
+
+- GitHub：[@4682b4leee](https://github.com/4682b4leee)
+- 项目：[4682B4-guanlan](https://github.com/4682b4leee/4682B4-guanlan)
