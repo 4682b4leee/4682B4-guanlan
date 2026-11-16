@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="862" height="48" viewBox="0 0 862 48">
+  <!-- README 顶部徽章条：纯本地 SVG，不依赖 shields.io，离线也能显示
+       每个胶囊宽度 = 左侧 30px（含圆点）+ 文字实测宽度 + 右侧 20px
+       文字基线 28.5：12.5px 字号在 40px 高胶囊内垂直居中 -->
+  <defs>
+    <style>
+      .pill { fill: #ffffff; stroke: #e6e6e3; stroke-width: 1; }
+      .txt  { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+              font-size: 12.5px; fill: #5b5d63; }
+      .txt-cn { font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+                font-size: 12.5px; fill: #5b5d63; }
+    </style>
+  </defs>
+
+  <!-- 1. Python 版本 -->
+  <rect class="pill" x="4" y="4" width="134" height="40" rx="20"/>
+  <circle cx="22" cy="24" r="4" fill="#2231dd"/>
+  <text class="txt" x="34" y="28.5">Python 3.9+</text>
+
+  <!-- 2. 平台数量 -->
+  <rect class="pill" x="148" y="4" width="102" height="40" rx="20"/>
+  <circle cx="166" cy="24" r="4" fill="#ff2442"/>
+  <text class="txt-cn" x="178" y="28.5">4 个平台</text>
+
+  <!-- 3. 采集内核 -->
+  <rect class="pill" x="260" y="4" width="127" height="40" rx="20"/>
+  <circle cx="278" cy="24" r="4" fill="#00a1d6"/>
+  <text class="txt" x="290" y="28.5">Playwright</text>
+
+  <!-- 4. 本地优先 -->
+  <rect class="pill" x="397" y="4" width="103" height="40" rx="20"/>
+  <circle cx="415" cy="24" r="4" fill="#1f9d55"/>
+  <text class="txt-cn" x="427" y="28.5">本地优先</text>
+
+  <!-- 5. 只读边界 -->
+  <rect class="pill" x="510" y="4" width="103" height="40" rx="20"/>
+  <circle cx="528" cy="24" r="4" fill="#17181a"/>
+  <text class="txt-cn" x="540" y="28.5">只读采集</text>
+
+  <!-- 6. 测试 -->
+  <rect class="pill" x="623" y="4" width="150" height="40" rx="20"/>
+  <circle cx="641" cy="24" r="4" fill="#1f9d55"/>
+  <text class="txt" x="653" y="28.5">60 tests · OK</text>
+
+  <!-- 7. 许可证 -->
+  <rect class="pill" x="783" y="4" width="75" height="40" rx="20"/>
+  <circle cx="801" cy="24" r="4" fill="#2231dd"/>
+  <text class="txt" x="813" y="28.5">MIT</text>
+</svg>

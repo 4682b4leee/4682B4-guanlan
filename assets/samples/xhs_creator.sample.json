@@ -1,0 +1,64 @@
+{
+  "_说明": "采集结果的字段结构样例，数值与账号信息均为虚构。真实数据写在用户目录，不进仓库。",
+  "platform": { "id": "xhs", "name": "小红书", "sourceType": "creator_platform" },
+  "account": {
+    "nickname": "示例账号",
+    "redId": "example_id",
+    "fans": 1234,
+    "follows": 56,
+    "likesCollects": 7890
+  },
+  "notes": [
+    {
+      "title": "示例笔记标题",
+      "postDate": "2026-11-11",
+      "exposure": 1772,
+      "read": 418,
+      "ctr": "16.10%",
+      "likes": 51,
+      "comments": 1,
+      "collects": 7,
+      "fansGain": 1,
+      "shares": 0,
+      "cover": null
+    }
+  ],
+  "weekNotes": [
+    {
+      "title": "示例笔记标题",
+      "postDate": "2026-11-11",
+      "exposure": 1772,
+      "read": 418,
+      "ctr": "16.10%",
+      "likes": 51,
+      "comments": 1,
+      "collects": 7,
+      "fansGain": 1,
+      "shares": 0,
+      "cover": null
+    }
+  ],
+  "weekSummary": { "notes": 5, "read": 741, "likes": 72, "collects": 10 },
+  "weekStart": "2026-11-09",
+  "fansMetrics": {
+    "_说明": "来自创作服务平台账号数据页，近 30 日按日曲线。样例只保留 2 天。",
+    "range": { "begin": "2026-11-11", "end": "2026-11-12", "days": 2 },
+    "summary": {
+      "net": 12,
+      "netRing": 140,
+      "new": 22,
+      "newRing": 0,
+      "lost": 12,
+      "lostRing": -29,
+      "visitors": 484,
+      "visitorsRing": 22,
+      "convRate": 1.2,
+      "convRing": -19
+    },
+    "trend": [
+      { "date": "2026-11-11", "net": 1, "new": 3, "lost": 2, "visitors": 25, "conv": 8 },
+      { "date": "2026-11-12", "net": -1, "new": 0, "lost": 1, "visitors": 14, "conv": 0 }
+    ]
+  },
+  "collectedAt": "2026-11-13T12:00:00+08:00"
+}

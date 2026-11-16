@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# Python 虚拟环境
+.venv/
+venv/
+
+# 临时调试产物（截图统一放 assets/screenshots）
+.screenshots/
+*.tmp
+
+# 本地个人素材（真实后台截图、个人种子数据等，不进入 Git）
+_local/
+
+# Trae 临时分享包
+.trae-html-share-packages/
+
+# 本地私有配置
+*.local.*
+.env
+.env.*

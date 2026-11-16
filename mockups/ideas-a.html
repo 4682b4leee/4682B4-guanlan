@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>选题工作台 · 方案 A 蓝图工作流</title>
+<style>
+/* ============================================================
+   方案 A：蓝图工作流
+   三段式 01 素材 → 02 选题卡 → 03 本周计划
+   视觉：工程蓝图 / 细线 / 编号 / 数据行 / 无重阴影
+   ============================================================ */
+:root {
+  --bg: #efefed;
+  --surface: #ffffff;
+  --surface-2: #f4f4f2;
+  --ink: #17181a;
+  --ink-2: #5b5d63;
+  --ink-3: #8e9097;
+  --line: #e6e6e3;
+  --accent: #2231dd;
+  --accent-weak: #eef0ff;
+  --pos: #1f9d55;
+  --neg: #e5484d;
+  --warn: #e09a12;
+  --r-panel: 20px;
+  --r-row: 10px;
+  --r-tag: 6px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, "SF Mono", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background-color: var(--bg);
+  /* 极淡的蓝图网格：只做底纹，不干扰阅读 */
+  background-image:
+    linear-gradient(rgba(23,24,26,.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23,24,26,.022) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: var(--ink);
+  font-family: Inter, "SF Pro Text", -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); }
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  height: 56px; display: flex; align-items: center; gap: 32px;
+  padding: 0 28px;
+  background: rgba(247,247,246,.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand-mark {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: #4682B4; position: relative;
+}
+.brand-mark::before, .brand-mark::after {
+  content: ""; position: absolute; top: 11px; width: 4px; height: 8px;
+  border-radius: 2px; background: #fff;
+}
+.brand-mark::before { left: 9px; }
+.brand-mark::after { right: 9px; }
+.brand-name { font-size: 14px; font-weight: 600; letter-spacing: .01em; }
+.brand-en { font-size: 10px; color: var(--ink-3); letter-spacing: .14em; margin-left: 2px; }
+.nav { display: flex; gap: 2px; }
+.nav a {
+  padding: 6px 11px; border-radius: 999px;
+  font-size: 13px; color: var(--ink-2); text-decoration: none;
+}
+.nav a:hover { background: rgba(23,24,26,.05); color: var(--ink); }
+.nav a.on { background: var(--ink); color: #fff; }
+.top-right { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 11.5px; color: var(--ink-3); }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.dot.pos { background: var(--pos); }
+
+/* ---------- 页面 ---------- */
+main { max-width: 1480px; margin: 0 auto; padding: 22px 28px 64px; }
+.page-head { margin-bottom: 18px; }
+.eyebrow {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .18em;
+  color: var(--accent); text-transform: uppercase; margin-bottom: 7px;
+}
+h1 { margin: 0; font-size: 26px; font-weight: 650; letter-spacing: -.03em; }
+.page-head p { margin: 5px 0 0; font-size: 12px; color: var(--ink-3); }
+
+/* 01/02/03 流程线 */
+.flow-head {
+  position: relative;
+  display: grid; grid-template-columns: 300px minmax(0,1fr) 300px;
+  gap: 24px; margin: 8px 0 16px;
+}
+.flow-head::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 13px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34,49,221,.38) 6%, rgba(34,49,221,.38) 94%, transparent);
+}
+.flow-step { position: relative; display: flex; align-items: baseline; gap: 9px; }
+.flow-step .no {
+  position: relative; z-index: 1;
+  padding-right: 8px; background: var(--bg);
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  letter-spacing: .08em;
+}
+.flow-step b { position: relative; z-index: 1; background: var(--bg); padding: 0 6px 0 0; font-size: 12.5px; font-weight: 600; }
+.flow-step i { position: relative; z-index: 1; background: var(--bg); padding-right: 8px; font-style: normal; font-size: 10.5px; color: var(--ink-3); }
+
+/* 三栏：中间和右侧用竖线分隔 */
+.flow-grid {
+  display: grid; grid-template-columns: 300px minmax(0,1fr) 300px;
+  gap: 24px; align-items: start;
+}
+.flow-col { min-width: 0; }
+.flow-col + .flow-col { border-left: 1px solid var(--line); padding-left: 24px; }
+
+/* ---------- 01 素材 ---------- */
+.material { display: flex; flex-direction: column; gap: 10px; }
+.field {
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-row);
+  background: rgba(255,255,255,.55);
+  transition: border-color .16s ease, background .16s ease;
+}
+.field:hover { border-color: rgba(34,49,221,.38); background: var(--surface); }
+.field label {
+  display: block; margin-bottom: 5px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .12em;
+  color: var(--ink-3); text-transform: uppercase;
+}
+.field p { margin: 0; font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+.field p b { color: var(--ink); font-weight: 600; }
+.gen-btn {
+  height: 40px; margin-top: 2px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--ink); color: #fff; font-size: 12.5px; font-weight: 500;
+  transition: transform .18s cubic-bezier(.22,1,.36,1), background .16s ease;
+}
+.gen-btn:hover { background: #000; transform: translateY(-1px); }
+.gen-btn span { font-family: var(--mono); font-size: 14px; }
+.material-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: var(--ink-3); }
+
+/* ---------- 02 选题卡 ---------- */
+.board {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 6px 16px 4px;
+}
+.board-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 2px 10px; border-bottom: 1px solid var(--line);
+}
+.board-head h2 { margin: 0; font-size: 13px; font-weight: 600; }
+.board-head .count { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+.board-head .right { margin-left: auto; font-size: 10.5px; color: var(--ink-3); }
+.idea-row {
+  display: grid; grid-template-columns: 48px minmax(0,1fr) auto;
+  gap: 14px; align-items: start;
+  padding: 14px 2px;
+  border-bottom: 1px solid #f0f0ee;
+  transition: background .16s ease;
+}
+.idea-row:last-child { border-bottom: 0; }
+.idea-row:hover { background: #fafaf9; }
+.score { padding-top: 1px; }
+.score b { display: block; font-size: 22px; font-weight: 650; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.score span { font-size: 9px; color: var(--ink-3); font-family: var(--mono); }
+.idea-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+.tag {
+  padding: 1px 6px; border-radius: var(--r-tag);
+  background: var(--surface-2); color: var(--ink-2);
+  font-size: 9.5px;
+}
+.tag.hot { color: #b4460a; background: #fdf0e6; }
+.idea-body h3 { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.45; }
+.idea-body p { margin: 4px 0 0; font-size: 11px; color: var(--ink-2); line-height: 1.55; }
+.idea-body .based { margin-top: 5px; font-size: 9.5px; color: var(--ink-3); }
+.idea-ops { display: flex; flex-direction: column; gap: 6px; padding-top: 1px; }
+.mini-btn {
+  height: 26px; padding: 0 11px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface);
+  font-size: 10px; color: var(--ink-2); white-space: nowrap;
+  transition: border-color .16s ease, color .16s ease, background .16s ease;
+}
+.mini-btn:hover { border-color: rgba(34,49,221,.4); color: var(--accent); background: var(--accent-weak); }
+.mini-btn.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+.mini-btn.primary:hover { background: #000; color: #fff; }
+
+/* ---------- 03 本周计划 ---------- */
+.plan { display: flex; flex-direction: column; gap: 0; }
+.plan-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.plan-head h2 { margin: 0; font-size: 13px; font-weight: 600; }
+.plan-head span { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+.progress { height: 3px; border-radius: 2px; background: #e6e6e3; overflow: hidden; margin-bottom: 12px; }
+.progress i { display: block; width: 60%; height: 100%; background: var(--accent); border-radius: 2px; }
+.plan-row {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 10px 0; border-top: 1px solid #f0f0ee;
+}
+.plan-row:first-of-type { border-top: 0; }
+.check {
+  width: 16px; height: 16px; margin-top: 1px; flex: none;
+  border: 1px solid #cfcfca; border-radius: 5px; background: #fff;
+  display: grid; place-items: center; font-size: 9px; color: #fff;
+}
+.plan-row.done .check { background: var(--ink); border-color: var(--ink); }
+.plan-row.done .check::after { content: "✓"; }
+.plan-row.done .plan-title { text-decoration: line-through; color: var(--ink-3); }
+.plan-score { font-family: var(--mono); font-size: 11px; color: var(--accent); width: 24px; flex: none; padding-top: 1px; }
+.plan-main { min-width: 0; }
+.plan-title { font-size: 12px; font-weight: 500; line-height: 1.4; }
+.plan-meta { margin-top: 2px; font-size: 9.5px; color: var(--ink-3); }
+.plan-copy {
+  margin-top: 12px; height: 34px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface);
+  font-size: 11px; color: var(--ink-2);
+}
+.plan-copy:hover { border-color: rgba(34,49,221,.4); color: var(--accent); }
+.page-note {
+  margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--line);
+  display: flex; gap: 10px; flex-wrap: wrap;
+  font-size: 10px; color: var(--ink-3);
+}
+.page-note b { font-family: var(--mono); font-weight: 400; color: var(--ink-2); }
+
+@media (max-width: 1200px) {
+  .flow-head { grid-template-columns: 1fr; gap: 10px; }
+  .flow-head::before { display: none; }
+  .flow-grid { grid-template-columns: 1fr; }
+  .flow-col + .flow-col { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 18px; }
+  .idea-row { grid-template-columns: 44px minmax(0,1fr); }
+  .idea-ops { grid-column: 2; flex-direction: row; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <span><span class="brand-name">观澜</span><span class="brand-en">GUANLAN</span></span>
+  </div>
+  <nav class="nav">
+    <a href="#">总览</a><a href="#">内容</a><a href="#">粉丝</a><a href="#">复盘</a><a href="#" class="on">选题</a><a href="#">设置</a>
+  </nav>
+  <div class="top-right"><span class="dot pos"></span>4/4 已接入 · 全部接入 <span class="mono">11/14 15:48</span></div>
+</header>
+
+<main>
+  <div class="page-head">
+    <div class="eyebrow">Ideas Engine / Blueprint 01</div>
+    <h1>选题工作台</h1>
+    <p>把本周素材，沿着 01 → 02 → 03 变成可以直接开工的选题。</p>
+  </div>
+
+  <!-- 流程线 -->
+  <div class="flow-head">
+    <div class="flow-step"><span class="no">01</span><b>素材</b><i>本周真实经历</i></div>
+    <div class="flow-step"><span class="no">02</span><b>选题卡</b><i>热榜优先 · 带切口</i></div>
+    <div class="flow-step"><span class="no">03</span><b>本周计划</b><i>勾选 · 拖拽排序</i></div>
+  </div>
+
+  <div class="flow-grid">
+    <!-- 01 素材 -->
+    <section class="flow-col">
+      <div class="material">
+        <div class="field">
+          <label>This week / 做了什么</label>
+          <p>用 TRAE 做了个小游戏，最后跑通 <b>30 秒版本</b>，中间踩了 3 个坑：提示词、素材、节奏。</p>
+        </div>
+        <div class="field">
+          <label>Stuck / 被什么卡住</label>
+          <p>封面点击率一直上不去，标题改到第 <b>12 版</b> 才有点感觉。</p>
+        </div>
+        <div class="field">
+          <label>Asked / 读者在问</label>
+          <p>“这个效果怎么做”“能不能出教程”“用的是什么工具”。</p>
+        </div>
+        <button class="gen-btn">生成 10 个选题 <span>→</span></button>
+        <div class="material-foot"><span>口吻：口语 / 直接</span><span>已反馈 3 条</span></div>
+      </div>
+    </section>
+
+    <!-- 02 选题卡 -->
+    <section class="flow-col">
+      <div class="board">
+        <div class="board-head">
+          <h2>选题卡</h2>
+          <span class="count">05 条</span>
+          <span class="right">热榜优先 · 至少 7 条来自平台热点</span>
+        </div>
+
+        <article class="idea-row">
+          <div class="score"><b>92</b><span>/100</span></div>
+          <div class="idea-body">
+            <div class="idea-meta"><span class="tag hot">热榜</span><span class="tag">避坑</span><span class="tag">双平台</span></div>
+            <h3>影视飓风 Tim 开通个人账号：普通人现在入场还有机会吗</h3>
+            <p>切口：先给结论——有，但只在这 3 个细分方向。用你自己的 TRAE 小游戏做正例，再讲 2 个反例。</p>
+            <div class="based">基于：影视飓风 Tim 开通个人账号 · 成本 中</div>
+          </div>
+          <div class="idea-ops"><button class="mini-btn">展开成稿</button><button class="mini-btn primary">加入计划</button></div>
+        </article>
+
+        <article class="idea-row">
+          <div class="score"><b>88</b><span>/100</span></div>
+          <div class="idea-body">
+            <div class="idea-meta"><span class="tag hot">热榜</span><span class="tag">对比</span><span class="tag">小红书</span></div>
+            <h3>同一段 prompt，第 1 版和第 12 版到底差在哪</h3>
+            <p>切口：把两版结果并排，只讲一个变量：约束写清楚之后，模型才知道要执行什么。</p>
+            <div class="based">基于：为什么同一段 prompt 结果不同 · 成本 低</div>
+          </div>
+          <div class="idea-ops"><button class="mini-btn">展开成稿</button><button class="mini-btn primary">加入计划</button></div>
+        </article>
+
+        <article class="idea-row">
+          <div class="score"><b>84</b><span>/100</span></div>
+          <div class="idea-body">
+            <div class="idea-meta"><span class="tag hot">热榜</span><span class="tag">教程</span><span class="tag">抖音</span></div>
+            <h3>用 TRAE 做 30 秒小游戏，3 步跑通</h3>
+            <p>切口：不讲原理，只演示从空白到能玩的三步；最后把踩过的坑做成字幕。</p>
+            <div class="based">基于：小游戏 / AI 开发 · 成本 低</div>
+          </div>
+          <div class="idea-ops"><button class="mini-btn">展开成稿</button><button class="mini-btn primary">加入计划</button></div>
+        </article>
+
+        <article class="idea-row">
+          <div class="score"><b>79</b><span>/100</span></div>
+          <div class="idea-body">
+            <div class="idea-meta"><span class="tag hot">热榜</span><span class="tag">清单</span><span class="tag">小红书</span></div>
+            <h3>AI MV 最容易翻车的 5 个地方</h3>
+            <p>切口：从你那条杂志拼贴 MV 里挑 5 个真实失败点，每个配一张前后对比图。</p>
+            <div class="based">基于：「示例内容」MV 拼贴 · 成本 中</div>
+          </div>
+          <div class="idea-ops"><button class="mini-btn">展开成稿</button><button class="mini-btn primary">加入计划</button></div>
+        </article>
+
+        <article class="idea-row">
+          <div class="score"><b>75</b><span>/100</span></div>
+          <div class="idea-body">
+            <div class="idea-meta"><span class="tag">自有</span><span class="tag">复盘</span><span class="tag">双平台</span></div>
+            <h3>本周 9 条内容，为什么只有 3 条带来粉丝</h3>
+            <p>切口：把涨粉内容和没涨粉内容并排，只比开头、互动引导、关注理由三件事。</p>
+            <div class="based">基于：本周高分内容 · 成本 低</div>
+          </div>
+          <div class="idea-ops"><button class="mini-btn">展开成稿</button><button class="mini-btn primary">加入计划</button></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 03 本周计划 -->
+    <section class="flow-col">
+      <div class="plan">
+        <div class="plan-head"><h2>本周计划</h2><span>03 / 05</span></div>
+        <div class="progress"><i></i></div>
+
+        <div class="plan-row done">
+          <span class="check"></span><span class="plan-score">92</span>
+          <div class="plan-main"><div class="plan-title">影视飓风 Tim 开通个人账号：普通人现在入场还有机会吗</div><div class="plan-meta">双平台 · 避坑 · 已发布</div></div>
+        </div>
+        <div class="plan-row done">
+          <span class="check"></span><span class="plan-score">88</span>
+          <div class="plan-main"><div class="plan-title">同一段 prompt，第 1 版和第 12 版到底差在哪</div><div class="plan-meta">小红书 · 对比 · 已发布</div></div>
+        </div>
+        <div class="plan-row">
+          <span class="check"></span><span class="plan-score">84</span>
+          <div class="plan-main"><div class="plan-title">用 TRAE 做 30 秒小游戏，3 步跑通</div><div class="plan-meta">抖音 · 教程 · 成本 低</div></div>
+        </div>
+        <button class="plan-copy">复制本周计划</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="page-note">
+    <span><b>数据源</b> 小红书创作灵感 · 抖音热榜 · 自有高分内容</span>
+    <span><b>筛选</b> DeepSeek 已按关注方向和 3 条反馈调整</span>
+    <span><b>提示</b> 这是方案 A 静态效果页，功能和正式页一致</span>
+  </div>
+</main>
+
+</body>
+</html>

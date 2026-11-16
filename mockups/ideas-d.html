@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>选题工作台 · 方案 D 液态画布</title>
+<style>
+/* ============================================================
+   方案 D：液态画布
+   一个 pill 在同一位置展开成整块工作台面板
+   参考 Bencho Create menu：同心圆角 / 快速落位 / 内容晚一步出现
+   ============================================================ */
+:root {
+  --bg: #f1f1ef;
+  --surface: #ffffff;
+  --surface-2: #f5f5f3;
+  --ink: #17181a;
+  --ink-2: #5b5d63;
+  --ink-3: #8e9097;
+  --line: #e7e7e3;
+  --accent: #2231dd;
+  --accent-weak: #eef0ff;
+  --pos: #1f9d55;
+  --r-panel: 28px;
+  --r-row: 14px;
+  --r-tag: 6px;
+  --sans: Inter, "SF Pro Text", -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, "SF Mono", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+.mono { font-family: var(--mono); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- 顶栏 ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 30;
+  height: 56px; display: flex; align-items: center; gap: 32px;
+  padding: 0 28px;
+  background: rgba(247,247,246,.86);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand-mark { width: 30px; height: 30px; border-radius: 9px; background: #4682B4; position: relative; }
+.brand-mark::before, .brand-mark::after {
+  content: ""; position: absolute; top: 11px; width: 4px; height: 8px; border-radius: 2px; background: #fff;
+}
+.brand-mark::before { left: 9px; } .brand-mark::after { right: 9px; }
+.brand-name { font-size: 14px; font-weight: 600; }
+.brand-en { font-size: 10px; color: var(--ink-3); letter-spacing: .14em; margin-left: 2px; }
+.nav { display: flex; gap: 2px; }
+.nav a { padding: 6px 11px; border-radius: 999px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+.nav a:hover { background: rgba(23,24,26,.05); color: var(--ink); }
+.nav a.on { background: var(--ink); color: #fff; }
+.top-right { margin-left: auto; font-size: 11.5px; color: var(--ink-3); display: flex; gap: 14px; align-items: center; }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: var(--pos); }
+
+/* ---------- 舞台 ---------- */
+main { max-width: 1480px; margin: 0 auto; padding: 22px 28px 40px; }
+.page-head { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 16px; }
+.page-head .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: var(--accent); }
+.page-head h1 { margin: 0; font-size: 26px; font-weight: 650; letter-spacing: -.03em; }
+.page-head p { margin: 0 0 3px auto; font-size: 11.5px; color: var(--ink-3); }
+
+.stage {
+  position: relative;
+  height: 660px;
+  border-radius: 32px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(34,49,221,.10), transparent 34%),
+    radial-gradient(rgba(23,24,26,.10) 1px, transparent 1px);
+  background-size: auto, 24px 24px;
+  background-color: #ececea;
+}
+/* 舞台四角的坐标标记，像一块画布 */
+.stage::before, .stage::after {
+  content: ""; position: absolute; width: 18px; height: 18px;
+  border-left: 1px solid rgba(23,24,26,.22); border-top: 1px solid rgba(23,24,26,.22);
+  top: 18px; left: 18px;
+}
+.stage::after { left: auto; right: 18px; transform: scaleX(-1); }
+.stage-hint {
+  position: absolute; left: 50%; top: calc(50% + 46px);
+  transform: translateX(-50%);
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+  letter-spacing: .08em; white-space: nowrap;
+  transition: opacity .18s ease;
+}
+.stage[data-open] .stage-hint { opacity: 0; }
+
+/* 关闭态的 pill：和面板同一中心 */
+.start-pill {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  height: 46px; padding: 0 22px 0 18px;
+  display: inline-flex; align-items: center; gap: 9px;
+  border-radius: 999px; background: var(--surface);
+  box-shadow: 0 10px 30px rgba(23,24,26,.10), 0 1px 0 rgba(255,255,255,.8) inset;
+  font-size: 13px; color: var(--ink);
+  transition: transform .22s cubic-bezier(.22,1,.36,1), opacity .18s ease, box-shadow .22s ease;
+  z-index: 3;
+}
+.start-pill:hover { transform: translate(-50%, -50%) translateY(-2px); box-shadow: 0 16px 38px rgba(23,24,26,.14); }
+.start-pill:active { transform: translate(-50%, -50%) scale(.96); }
+.start-pill .plus {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--surface-2); color: var(--ink-2);
+  font-size: 14px; line-height: 1;
+}
+.stage[data-open] .start-pill { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(.9); }
+
+/* 展开后的面板：从同一中心长出来 */
+.liquid-panel {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 160px; height: 46px;
+  border-radius: 23px;
+  background: var(--surface);
+  box-shadow: 0 30px 80px rgba(23,24,26,.16);
+  overflow: hidden;
+  opacity: 0; pointer-events: none;
+  transition:
+    width .62s cubic-bezier(.22,1,.36,1),
+    height .62s cubic-bezier(.22,1,.36,1),
+    border-radius .62s cubic-bezier(.22,1,.36,1),
+    opacity .18s ease;
+  z-index: 2;
+}
+.stage[data-open] .liquid-panel {
+  width: min(1240px, calc(100vw - 56px));
+  height: 580px;
+  border-radius: var(--r-panel);
+  opacity: 1; pointer-events: auto;
+  transition:
+    width .62s cubic-bezier(.22,1,.36,1),
+    height .62s cubic-bezier(.22,1,.36,1),
+    border-radius .62s cubic-bezier(.22,1,.36,1),
+    opacity .12s ease;
+}
+.panel-inner {
+  height: 100%; display: flex; flex-direction: column;
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .18s ease, transform .28s cubic-bezier(.22,1,.36,1);
+}
+.stage[data-open] .panel-inner {
+  opacity: 1; transform: none;
+  transition-delay: .26s;
+}
+.panel-head {
+  height: 52px; flex: none;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 18px 0 22px;
+  border-bottom: 1px solid var(--line);
+}
+.panel-head .title { font-size: 13px; font-weight: 600; }
+.panel-head .meta { font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); }
+.panel-head .right { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--ink-3); }
+.panel-close {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--surface-2); color: var(--ink-2); font-size: 15px;
+}
+.panel-close:hover { background: rgba(23,24,26,.10); color: var(--ink); }
+
+.panel-grid {
+  flex: 1; min-height: 0;
+  display: grid; grid-template-columns: 290px minmax(0,1fr) 280px;
+}
+.panel-col { min-width: 0; padding: 18px 20px; overflow-y: auto; }
+.panel-col + .panel-col { border-left: 1px solid var(--line); }
+.col-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .12em;
+  color: var(--ink-3); text-transform: uppercase; margin-bottom: 10px;
+}
+
+/* 素材 */
+.field {
+  padding: 11px 12px; margin-bottom: 8px;
+  border: 1px solid var(--line); border-radius: var(--r-row);
+  background: rgba(255,255,255,.6);
+  transition: border-color .16s ease, background .16s ease;
+}
+.field:hover { border-color: rgba(34,49,221,.35); background: #fff; }
+.field label { display: block; margin-bottom: 4px; font-family: var(--mono); font-size: 9px; color: var(--ink-3); }
+.field p { margin: 0; font-size: 11.5px; color: var(--ink-2); line-height: 1.55; }
+.field p b { color: var(--ink); font-weight: 600; }
+.gen-btn {
+  width: 100%; height: 38px; margin-top: 4px; border-radius: 999px;
+  background: var(--ink); color: #fff; font-size: 12px;
+  transition: background .16s ease, transform .18s cubic-bezier(.22,1,.36,1);
+}
+.gen-btn:hover { background: #000; transform: translateY(-1px); }
+
+/* 选题卡 */
+.idea-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.idea-head h2 { margin: 0; font-size: 12.5px; font-weight: 600; }
+.idea-head span { font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); }
+.idea-head .right { margin-left: auto; }
+.idea-row {
+  display: grid; grid-template-columns: 42px minmax(0,1fr) auto;
+  gap: 11px; padding: 12px 8px; border-top: 1px solid #f0f0ee;
+  border-radius: 12px;
+  transition: background .16s ease;
+}
+.idea-row:first-of-type { border-top: 0; }
+.idea-row:hover { background: var(--surface-2); }
+.score b { display: block; font-size: 19px; font-weight: 650; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.score span { font-size: 8.5px; color: var(--ink-3); font-family: var(--mono); }
+.idea-meta { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 3px; }
+.tag { padding: 1px 6px; border-radius: var(--r-tag); background: var(--surface-2); color: var(--ink-2); font-size: 9px; }
+.tag.hot { color: var(--accent); background: var(--accent-weak); }
+.idea-row h3 { margin: 0; font-size: 12px; font-weight: 600; line-height: 1.45; }
+.idea-row p { margin: 3px 0 0; font-size: 10.5px; color: var(--ink-2); line-height: 1.5; }
+.idea-row .based { margin-top: 4px; font-size: 9px; color: var(--ink-3); }
+.ops { display: flex; flex-direction: column; gap: 5px; }
+.mini {
+  height: 24px; padding: 0 9px; border-radius: 999px;
+  border: 1px solid var(--line); background: #fff;
+  font-size: 9.5px; color: var(--ink-2); white-space: nowrap;
+}
+.mini:hover { border-color: rgba(34,49,221,.4); color: var(--accent); }
+.mini.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* 计划 */
+.plan-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.plan-head h2 { margin: 0; font-size: 12.5px; font-weight: 600; }
+.plan-head span { margin-left: auto; font-family: var(--mono); font-size: 9.5px; color: var(--ink-3); }
+.plan-progress { height: 3px; border-radius: 2px; background: #e9e9e6; overflow: hidden; margin-bottom: 10px; }
+.plan-progress i { display: block; width: 60%; height: 100%; background: var(--accent); }
+.plan-row { display: flex; gap: 8px; align-items: flex-start; padding: 9px 0; border-top: 1px solid #f0f0ee; }
+.plan-row:first-of-type { border-top: 0; }
+.check {
+  width: 15px; height: 15px; flex: none; margin-top: 1px;
+  border: 1px solid #cfcfca; border-radius: 5px; background: #fff;
+  display: grid; place-items: center; font-size: 9px; color: #fff;
+}
+.plan-row.done .check { background: var(--ink); border-color: var(--ink); }
+.plan-row.done .check::after { content: "✓"; }
+.plan-row.done .plan-title { text-decoration: line-through; color: var(--ink-3); }
+.plan-score { font-family: var(--mono); font-size: 10px; color: var(--accent); width: 22px; flex: none; }
+.plan-main { min-width: 0; }
+.plan-title { font-size: 11px; font-weight: 500; line-height: 1.4; }
+.plan-meta { margin-top: 2px; font-size: 9px; color: var(--ink-3); }
+.copy-plan {
+  width: 100%; height: 32px; margin-top: 10px; border-radius: 999px;
+  border: 1px solid var(--line); background: #fff;
+  font-size: 10.5px; color: var(--ink-2);
+}
+.copy-plan:hover { border-color: rgba(34,49,221,.4); color: var(--accent); }
+
+/* 底部提示 */
+.stage-foot {
+  position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+  display: flex; gap: 18px; font-size: 10px; color: var(--ink-3);
+  transition: opacity .18s ease;
+}
+.stage[data-open] .stage-foot { opacity: 0; }
+.stage-foot b { font-family: var(--mono); font-weight: 400; color: var(--ink-2); }
+
+@media (max-width: 1180px) {
+  .panel-grid { grid-template-columns: 1fr; }
+  .panel-col + .panel-col { border-left: 0; border-top: 1px solid var(--line); }
+  .stage { height: 900px; }
+  .stage[data-open] .liquid-panel { height: 820px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <span><span class="brand-name">观澜</span><span class="brand-en">GUANLAN</span></span>
+  </div>
+  <nav class="nav">
+    <a href="#">总览</a><a href="#">内容</a><a href="#">粉丝</a><a href="#">复盘</a><a href="#" class="on">选题</a><a href="#">设置</a>
+  </nav>
+  <div class="top-right"><span class="dot"></span>4/4 已接入 · 全部接入 <span class="mono">11/14 15:48</span></div>
+</header>
+
+<main>
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Ideas Canvas / D</div>
+      <h1>选题工作台</h1>
+    </div>
+    <p>点击中间的开始按钮，整块工作台会从 pill 里展开。</p>
+  </div>
+
+  <div class="stage" id="stage">
+    <!-- 关闭态 -->
+    <button class="start-pill" onclick="openStage()" aria-label="开始选题">
+      <span class="plus">＋</span>
+      <span>开始选题</span>
+    </button>
+    <div class="stage-hint">Fill three answers → Generate 10 ideas</div>
+
+    <!-- 展开态 -->
+    <div class="liquid-panel">
+      <div class="panel-inner">
+        <header class="panel-head">
+          <span class="title">选题引擎</span>
+          <span class="meta">IDEAS / 05</span>
+          <div class="right">
+            <span class="dot"></span> DeepSeek 已连接
+            <button class="panel-close" onclick="closeStage()" aria-label="关闭">×</button>
+          </div>
+        </header>
+
+        <div class="panel-grid">
+          <!-- 素材 -->
+          <section class="panel-col">
+            <div class="col-label">01 / 本周素材</div>
+            <div class="field">
+              <label>做了什么</label>
+              <p>用 TRAE 做了个小游戏，跑通 <b>30 秒版本</b>，踩了 3 个坑。</p>
+            </div>
+            <div class="field">
+              <label>卡在哪里</label>
+              <p>封面点击率上不去，标题改到第 <b>12 版</b> 才有点感觉。</p>
+            </div>
+            <div class="field">
+              <label>读者在问</label>
+              <p>“这个效果怎么做”“能不能出教程”“用的什么工具”。</p>
+            </div>
+            <button class="gen-btn" onclick="event.stopPropagation()">生成 10 个选题 →</button>
+          </section>
+
+          <!-- 选题卡 -->
+          <section class="panel-col">
+            <div class="idea-head">
+              <h2>选题卡</h2><span>05 条</span><span class="right">热榜优先 · 至少 7 条来自热点</span>
+            </div>
+
+            <article class="idea-row">
+              <div class="score"><b>92</b><span>/100</span></div>
+              <div>
+                <div class="idea-meta"><span class="tag hot">热榜</span><span class="tag">避坑</span><span class="tag">双平台</span></div>
+                <h3>影视飓风 Tim 开通个人账号：普通人现在入场还有机会吗</h3>
+                <p>先给结论——有，但只在这 3 个细分方向；用你的小游戏做正例，再讲 2 个反例。</p>
+                <div class="based">基于：影视飓风 Tim · 成本 中</div>
+              </div>
+              <div class="ops"><button class="mini">展开</button><button class="mini primary">加入</button></div>
+            </article>
+
+            <article class="idea-row">
+              <div class="score"><b>88</b><span>/100</span></div>
+              <div>
+                <div class="idea-meta"><span class="tag hot">热榜</span><span class="tag">对比</span><span class="tag">小红书</span></div>
+                <h3>同一段 prompt，第 1 版和第 12 版到底差在哪</h3>
+                <p>两版结果并排，只讲一个变量：约束写清楚之后，模型才知道要执行什么。</p>
+                <div class="based">基于：prompt 结果差异 · 成本 低</div>
+              </div>
+              <div class="ops"><button class="mini">展开</button><button class="mini primary">加入</button></div>
+            </article>
+
+            <article class="idea-row">
+              <div class="score"><b>84</b><span>/100</span></div>
+              <div>
+                <div class="idea-meta"><span class="tag hot">热榜</span><span class="tag">教程</span><span class="tag">抖音</span></div>
+                <h3>用 TRAE 做 30 秒小游戏，3 步跑通</h3>
+                <p>不讲原理，只演示从空白到能玩的三步；最后把踩过的坑做成字幕。</p>
+                <div class="based">基于：AI 小游戏 · 成本 低</div>
+              </div>
+              <div class="ops"><button class="mini">展开</button><button class="mini primary">加入</button></div>
+            </article>
+
+            <article class="idea-row">
+              <div class="score"><b>79</b><span>/100</span></div>
+              <div>
+                <div class="idea-meta"><span class="tag hot">热榜</span><span class="tag">清单</span><span class="tag">小红书</span></div>
+                <h3>AI MV 最容易翻车的 5 个地方</h3>
+                <p>从杂志拼贴 MV 里挑 5 个真实失败点，每个配一张前后对比图。</p>
+                <div class="based">基于：示例内容 MV · 成本 中</div>
+              </div>
+              <div class="ops"><button class="mini">展开</button><button class="mini primary">加入</button></div>
+            </article>
+
+            <article class="idea-row">
+              <div class="score"><b>75</b><span>/100</span></div>
+              <div>
+                <div class="idea-meta"><span class="tag">自有</span><span class="tag">复盘</span><span class="tag">双平台</span></div>
+                <h3>本周 9 条内容，为什么只有 3 条带来粉丝</h3>
+                <p>把涨粉内容和没涨粉内容并排，只比开头、互动引导、关注理由三件事。</p>
+                <div class="based">基于：本周高分内容 · 成本 低</div>
+              </div>
+              <div class="ops"><button class="mini">展开</button><button class="mini primary">加入</button></div>
+            </article>
+          </section>
+
+          <!-- 计划 -->
+          <section class="panel-col">
+            <div class="plan-head"><h2>本周计划</h2><span>03 / 05</span></div>
+            <div class="plan-progress"><i></i></div>
+
+            <div class="plan-row done">
+              <span class="check"></span><span class="plan-score">92</span>
+              <div class="plan-main"><div class="plan-title">影视飓风 Tim：普通人还有机会吗</div><div class="plan-meta">双平台 · 避坑 · 已发布</div></div>
+            </div>
+            <div class="plan-row done">
+              <span class="check"></span><span class="plan-score">88</span>
+              <div class="plan-main"><div class="plan-title">第 1 版 vs 第 12 版差在哪</div><div class="plan-meta">小红书 · 对比 · 已发布</div></div>
+            </div>
+            <div class="plan-row">
+              <span class="check"></span><span class="plan-score">84</span>
+              <div class="plan-main"><div class="plan-title">用 TRAE 做 30 秒小游戏</div><div class="plan-meta">抖音 · 教程 · 成本 低</div></div>
+            </div>
+            <button class="copy-plan">复制本周计划</button>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage-foot">
+      <span><b>数据</b> 小红书灵感 · 抖音热榜 · 自有内容</span>
+      <span><b>反馈</b> 不喜欢会记住理由</span>
+      <span><b>计划</b> 勾选 / 拖拽</span>
+    </div>
+  </div>
+</main>
+
+<script>
+/* 展开 / 收起：只切 data-open，尺寸与圆角交给 CSS 过渡 */
+function openStage() {
+  document.getElementById('stage').setAttribute('data-open', '');
+}
+function closeStage() {
+  document.getElementById('stage').removeAttribute('data-open');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeStage();
+});
+</script>
+
+</body>
+</html>
